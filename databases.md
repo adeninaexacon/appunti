@@ -194,3 +194,222 @@ Tipo logico con valori:
 - **ON / OFF**
 - **1 / 0**
 - **NULL**
+
+#  (16/12/25)
+
+DDL 
+ Create, Drop, Alt, truncate
+
+Ci permette di creare tabelle su Db
+
+create table nome_tabella {
+  campo1 tipo,
+  campo2 tipo,
+  campo3 tipo,
+}
+
+possiamo creare tabelle partendo da una query
+
+select ... as tabella {}
+
+---
+
+drop table if exist al posto di andare in errore solleva un warning
+
+---
+
+truncate table: cancella tutti i record della tabella
+
+---
+
+valore di default: popola la colonna quando non viene defintio un valore
+
+keyword default dopo il tipo quando definisco un campo
+
+---
+
+i Costraints: è un vincolo ,correttezza e coerenza del dato
+
+
+i vincoli possono essere di colonna o di tabella 
+
+check()
+
+qunado usiamo i vincoli dobbaimo fare attenzione ai null, non vengono considerati.
+
+bisogna usare isnull 
+
+vincolo not null
+
+nullable significa che quella colonna puo assumere valori null
+
+unique 
+
+btree index -> un modo per salvare i valori delle tabelle in modo efficiente. Campo1 è UNIQUE quando inserisco devo verificare che valore non sia presente nella colonna. per recuperare tutti i valori devo scansionare tutta la tabella. con l'indice btree la lookup è molto più veloce.
+
+create index
+
+chiavi primarie
+
+chiave semplice e chiave composta
+
+foreign key: integrità referenziale valori in una tabella presenti anche in un'altra (referenziata)
+
+valori in colonna referente presenti in colonnna referenziata
+
+references table_name(colonna referenziata)
+
+# DDL – Data Definition Language (16/12/2025)
+
+Il **DDL (Data Definition Language)** è il sottoinsieme del linguaggio SQL utilizzato per **definire e modificare la struttura del database**.  
+Consente di creare, alterare ed eliminare oggetti come tabelle, indici e vincoli.
+
+---
+
+## Operazioni principali
+
+### CREATE
+Utilizzato per creare nuovi oggetti nel database, in particolare le tabelle.
+
+```sql
+CREATE TABLE nome_tabella (
+    campo1 tipo,
+    campo2 tipo,
+    campo3 tipo
+);
+```
+
+È possibile creare una tabella **a partire dal risultato di una query**:
+
+```sql
+CREATE TABLE nuova_tabella AS
+SELECT ...
+```
+In questo caso vengono copiate solo le colonne e i dati risultanti dalla query, non i vincoli.
+
+### DROP
+
+Elimina definitivamente una tabella (struttura + dati).
+
+```sql
+DROP TABLE nome_tabella;
+```
+
+Per evitare errori nel caso la tabella non esista, si utilizza:
+
+```sql
+DROP TABLE IF EXISTS nome_tabella;
+```
+
+In questo modo il DBMS non solleva un errore ma solo un warning.
+
+### TRUNCATE
+
+Rimuove tutti i record da una tabella mantenendone la struttura.
+
+```sql
+TRUNCATE TABLE nome_tabella;
+```
+
+Caratteristiche principali:
+
+- operazione molto veloce
+
+- non attiva i trigger
+
+- non è selettiva (non supporta WHERE)
+
+- resetta eventuali contatori (es. SERIAL)
+
+### ALTER
+
+Utilizzato per modificare la struttura di una tabella esistente
+(es. aggiungere, rimuovere o modificare colonne e vincoli).
+
+```sql
+ALTER TABLE nome_tabella
+ADD COLUMN nuova_colonna tipo;
+```
+## Valori di default
+
+È possibile specificare un valore di default per una colonna, che viene utilizzato quando in fase di inserimento non viene fornito alcun valore.
+```sql
+campo tipo DEFAULT valore
+```
+
+Il valore di default viene valutato automaticamente dal DBMS.
+
+## Constraints (Vincoli)
+
+I constraints servono a garantire correttezza e coerenza dei dati all’interno del database.
+
+Possono essere:
+
+- di colonna
+
+- di tabella
+
+### Tipologie principali
+### NOT NULL
+
+Impedisce che una colonna assuma valori NULL.
+
+```sql
+campo tipo NOT NULL
+```
+
+Una colonna nullable è una colonna che può assumere valori NULL.
+
+### UNIQUE
+
+Garantisce l’unicità dei valori in una colonna (o insieme di colonne).
+
+```sql
+campo tipo UNIQUE
+```
+
+Per implementare l’unicità in modo efficiente, PostgreSQL utilizza un indice B-Tree.
+L’indice consente ricerche molto più veloci rispetto a una scansione completa della tabella.
+
+È possibile creare manualmente un indice:
+
+```sql
+CREATE INDEX nome_indice
+ON nome_tabella(campo);
+```
+### CHECK
+
+Consente di imporre una condizione logica sui valori di una colonna.
+```sql
+CHECK (condizione)
+```
+
+### ⚠️ Attenzione:
+I valori NULL non vengono valutati nei vincoli CHECK.
+Se necessario, occorre gestirli esplicitamente (ad esempio con IS NOT NULL).
+
+## Chiavi
+### Chiave primaria (PRIMARY KEY)
+
+Identifica univocamente ogni record di una tabella.
+
+Può essere:
+
+- semplice (una sola colonna)
+
+- composta (più colonne)
+```sql
+PRIMARY KEY (campo1, campo2)
+```
+
+### Chiave esterna (FOREIGN KEY)
+
+Garantisce l’integrità referenziale tra tabelle.
+
+I valori della colonna referente devono essere presenti nella colonna referenziata.
+```sql
+FOREIGN KEY (campo_referente)
+REFERENCES tabella_riferita(colonna_referenziata)
+```
+
+Serve a mantenere la coerenza tra i dati collegati in tabelle diverse.
