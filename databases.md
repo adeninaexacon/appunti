@@ -42,12 +42,34 @@ Le principali componenti di questo modello sono 4:
 - **Relazioni**: rappresentno come le entità sono legate tra di loro e come possono interagire. In genere sono tra 2 entità (Relazioni binarie) ma possono essere coinvolte N entità (ad esempio si incontrano spesso relazione ternarie). Esistono relazioni "ad anello" cioè tra un entità e se stessa. Tra 2 entità possono esserci più relazioni. Vengono rappresentate tramite un rombo (identificato dal nome della relazione).
 - **Attributi**: usati per descrivere un''entità / una relazione.
 Traa gli attributi viene identificata una chiave primaria che identifica univocamente un'entità. Graficamente si rappresentano con un ellisse (nel caso delle relazioni) oppure come righe all'interno del rettagolo (nel caso delle entità).
-- **Cardinalità**: utilizzata sia per gli attributi che per le relazioni. Nel caso degli attributi la cardinalità indica il numero di valori differenti che possono assumere. Nel caso delle relazioni 
+- **Cardinalità**: utilizzata sia per gli attributi che per le relazioni. Nel caso degli attributi la cardinalità indica il numero di valori differenti che possono assumere. 
 
-da finire
---- 
+Nel caso delle relazioni indica quante volte un istanza può partecipare a quella relazione.
+
+La cardinalità si indica con una coppia (numero minimo, numero massimo)
+
+La cardinalità indica il tipo di relazione:
+- *1-1*: se un'istanza di un'entità può essere legata tramite la relazione a un'istanza dell'altra entità
+- *1-n*: se un'istanza di un'entità può essere legata tramite la relazione a n istanze dell'altra entità
+- *n-n*: se n istanze di un'entità possono essere legate tramite la relazione a n istanze dell'altra entità
 
 
+## Modello Relazionale
+
+Traduzione del modello entità-relazione in un modello logico.
+
+Le entità e le relazioni devono essere tradotte in tabelle.
+
+Le entità sono facilmente traducibili, le relazioni meno.
+
+1. **Caso Generico**: La relazione viene tradotta in una tabella che ha come campi le chiavi primarie delle entità coinvolte più eventuali attributi della relazione.
+
+2. **Casi particolari**: 
+  - Relazione con cardinalità 1-1 (anche solo da un lato): basta aggiungere la chiave primaria dell'altra entità a quella della relazione e aggiungere gli eventuali attributi della relazione.
+  - Relazione con cardinalità 0-1: Nel caso in cui ci fosse una relazione in cui molte istanze di questa entità non partecipano alla relazione è meglio spezzare l'entità in due e quindi creare 2 tabelle. Questo viene fatto per avere un numero sistemicamente alto di null-values.
+  - Attributi multivalore: valutare se creare diverse colonne o se conviene avere tutto nella stessa colonna (ad esempio se la cardinalità è troppo alta)
+
+ 
 
 # Data type nei DBMS e in particolare in PostgreSQL (9/12/25)
 
