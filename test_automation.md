@@ -1,6 +1,6 @@
 # Test Automation
 
-## 1. Introduzione a Selenium WebDriver
+## Introduzione a Selenium WebDriver
 Selenium WebDriver permette di automatizzare browser reali (Chrome, Firefox, Edge).  
 Consente di:
 - aprire pagine web
@@ -22,7 +22,7 @@ List<WebElement> elements = driver.findElements(By.<strategia>());
 
 ---
 
-## 2. Strategie di selezione degli elementi (By)
+## Strategie di selezione degli elementi (By)
 
 ### 2.1 ID
 ```java
@@ -79,14 +79,12 @@ L'Xpath si può copiare direttamente dalla console del browser
 questo è il modo meno efficente per cercare un elemento
 by id > css select > .. > by xpath
 
-cssselcet
-start-with(@class, "navigation") è un modo per cercare utilizzando gli xapth
-
-
+csselcet
+start-with(@class, "navigation") è un modo per cercare utilizzando gli xpath
 
 ---
 
-## 3. Interazioni con gli elementi
+## Interazioni con gli elementi
 
 ### Inserimento testo e comandi da tastiera
 ```java
@@ -106,7 +104,7 @@ String txt = element.getText();
 
 ---
 
-## 5. Introduzione a TestNG
+## Introduzione a TestNG
 
 TestNG gestisce:
 - ciclo di vita dei test
@@ -126,7 +124,7 @@ TestNG gestisce:
 
 ---
 
-## 6. Asserzioni con TestNG
+## Asserzioni con TestNG
 
 ### assertTrue
 ```java
@@ -140,33 +138,7 @@ Assert.assertEquals(valoreAtteso, valoreReale);
 
 ---
 
-## 7. CSS Selector utili
-
-### Selettore per attributo
-```css
-[attribute="value"]
-```
-
-Esempi:
-```css
-[name="email"]
-[data-testid="submit"]
-[type="checkbox"]
-```
-
-### Gerarchia padre > figlio
-```css
-container > childElement
-```
-
-### Selettore discendente
-```css
-div.card h2.title
-```
-
----
-
-## 8. Flusso tipico di un test automatizzato
+## Flusso tipico di un test automatizzato
 
 1. Setup del browser – `@BeforeMethod`  
 2. Esecuzione del test – `@Test`  
@@ -177,7 +149,7 @@ div.card h2.title
 
 ---
 
-## 4. Gestione dei menu dropdown (<select>)
+## Gestione dei menu dropdown (<select>)
 
 Gli elementi `<select>` richiedono una classe dedicata:
 
@@ -197,12 +169,34 @@ Il valore dell’attributo `value` è solitamente stabile e indipendente dalla l
 
 ---
 
-aggiungere una sezione sull'implicit wait cioè quanto tempo il nostro driver aspetta prima di lanciare un'eccezione. serve per attendere che il sito si carichi correttamente 
+## Implicit Wait
 
-iframe: una specie di sotto pagina all'interno di una pagina 
+L’implicit wait definisce quanto tempo il driver attende
+prima di sollevare un’eccezione se un elemento non è immediatamente disponibile.
 
-Posso anche fare un test negativo ad esempio posso andare a fare un asserzione su un messaggio di errore.
+Serve per attendere il corretto caricamento della pagina.
+```java
+driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+```
 
-.getAttribute
+Caratteristiche:
 
-.isDisplayed
+- vale per tutte le findElement
+
+- riduce errori dovuti a caricamenti lenti
+
+- non è selettivo
+
+## Gestione degli iframe
+
+Un iframe è una pagina web annidata all’interno di un’altra pagina.
+
+Per interagire con elementi all’interno di un iframe è necessario cambiare contesto.
+```java
+driver.switchTo().frame("frameId");
+```
+
+Per tornare alla pagina principale:
+```java
+driver.switchTo().defaultContent();
+```
