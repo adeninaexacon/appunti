@@ -4,3 +4,4 @@ Questa repository contiene i miei appunti relativi ai cinque corsi seguiti duran
 
 ## Indice dei corsi
 [Databases](databases.md)
+[Test Automation](test_automation.md)
