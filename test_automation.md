@@ -149,7 +149,7 @@ Assert.assertEquals(valoreAtteso, valoreReale);
 
 ---
 
-## Gestione dei menu dropdown (<select>)
+## Gestione dei menu dropdown (`<select>`)
 
 Gli elementi `<select>` richiedono una classe dedicata:
 
