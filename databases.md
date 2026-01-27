@@ -630,7 +630,7 @@ ON a.key = b.key
 
 ```sql
 ...
-ON key
+USING (key)
 ```
 
 ## LEFT JOIN e RIGHT JOIN
@@ -701,3 +701,5 @@ FULL OUTER JOIN table_b b
 ON a.key = b.key
 WHERE a.key IS NULL OR b.key IS NULL
 ```
+
+`nota`: si possono aggiungere condizioni dop la keyword ON, la condizione viene applicata PRIMA della join
