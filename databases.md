@@ -350,3 +350,354 @@ REFERENCES tabella_riferita(colonna_referenziata)
 ```
 
 Serve a mantenere la coerenza tra i dati collegati in tabelle diverse.
+
+
+### Lezione 13/01
+
+## ALTER TABLE 
+
+Il comando `ALTER TABLE` permette di **modificare la struttura di una tabella esistente**:  
+aggiungere o rimuovere colonne, modificare tipi di dato e aggiungere vincoli.
+
+---
+
+#### Aggiungere una colonna
+
+```sql
+ALTER TABLE table_name
+ADD column_name datatype;
+```
+
+La colonna aggiunta viene popolata con:
+- `NULL` di default
+
+- oppure con un valore esplicito se viene specificato un `DEFAULT`
+
+#### Impostare un valore di default
+```sql
+ALTER TABLE table_name
+ADD column_name datatype DEFAULT valore;
+```
+
+#### Oppure su una colonna già esistente:
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name SET DEFAULT valore;
+```
+#### Rimuovere una colonna
+```sql
+ALTER TABLE table_name
+DROP column_name;
+```
+La colonna viene eliminata da tutte le righe della tabella.
+
+Attenzione ai vincoli di foreign key
+Se la colonna è coinvolta in un vincolo (es. foreign key), il comando fallisce.
+
+#### È possibile forzare la rimozione con:
+
+```sql
+ALTER TABLE table_name
+DROP column_name CASCADE;
+```
+Con `CASCADE`:
+
+- vengono eliminati anche i vincoli che dipendono dalla colonna
+
+- non viene eliminata la colonna nella tabella referenziata
+
+- si elimina solo il vincolo, non i dati dell’altra tabella
+
+### Operazione potenzialmente pericolosa.
+--- 
+### Aggiungere vincoli (CONSTRAINT)
+È possibile aggiungere vincoli anche dopo la creazione della tabella.
+
+#### Vincolo generico
+```sql
+ALTER TABLE table_name
+ADD CONSTRAINT nome_vincolo tipo_vincolo;
+```
+
+#### Per i vincoli NULL / NOT NULL si usa una sintassi diversa:
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name SET NOT NULL;
+```
+#### Per rimuovere il vincolo:
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name DROP NOT NULL;
+```
+### Tabelle di catalogo (metadati)
+PostgreSQL mantiene i metadati del database nello schema:
+- pgsql
+- pg_catalog
+
+#### Per visualizzare i vincoli:
+```sql
+SELECT *
+FROM pg_catalog.pg_constraint;
+```
+Queste tabelle descrivono:
+
+- tabelle
+
+- colonne
+
+- indici
+
+- vincoli
+
+- tipi di dato
+
+Sono utilizzate internamente dal DBMS e per interrogazioni di sistema.
+
+#### Modifica del tipo di una colonna
+È possibile cambiare il tipo di una colonna:
+
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name TYPE nuovo_tipo;
+```
+
+Alcune conversioni sono automatiche:
+
+`INTEGER → TEXT` : OK
+
+Altre richiedono conversione esplicita:
+
+`TEXT → INTEGER` : serve cast
+
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name TYPE INTEGER
+USING column_name::INTEGER;
+```
+Se la conversione non è possibile, PostgreSQL solleva un errore.
+
+# DML - Data Manipulation Language 
+
+Il **DML (Data Manipulation Language)** è la parte del linguaggio SQL che consente di:
+
+- inserire dati nelle tabelle
+- modificare dati esistenti
+- eliminare record
+
+I principali comandi sono:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+
+Queste operazioni agiscono **sui record**, non sulla struttura delle tabelle  
+(a differenza di `DROP` o `ALTER`, che sono comandi DDL).
+
+---
+
+## INSERT — Inserimento dei dati
+
+L’`INSERT` può essere eseguito:
+
+- in modo **hard-coded** (valori scritti esplicitamente)
+- tramite una **query** che legge i dati da un’altra tabella
+
+#### Inserimento hard-coded
+
+```sql
+INSERT INTO nome_tabella (col1, col2, col3)
+VALUES (val1, val2, val3);
+```
+##### Se si specificano tutte le colonne nello stesso ordine della tabella:
+```sql
+INSERT INTO nome_tabella
+VALUES (val1, val2, val3);
+```
+Le colonne non specificate assumono:
+
+- il valore di DEFAULT, se definito
+
+- altrimenti NULL
+
+#### INSERT con SELECT (da un’altra tabella)
+```sql
+INSERT INTO tabella_destinazione (col1, col2)
+SELECT campoA, campoB
+FROM tabella_sorgente
+WHERE condizione;
+```
+In questo caso:
+
+- il numero di colonne deve coincidere
+
+- i tipi devono essere compatibili
+
+## UPDATE — Modifica dei dati
+Serve per aggiornare uno o più record esistenti.
+
+```sql
+UPDATE nome_tabella
+SET col1 = nuovo_valore1,
+    col2 = nuovo_valore2
+WHERE condizione;
+```
+### Attenzione!!
+Se si omette la clausola WHERE, tutti i record della tabella vengono modificati:
+
+```sql
+UPDATE nome_tabella
+SET col1 = valore;
+```
+## DELETE — Eliminazione dei dati
+
+Serve per cancellare record da una tabella
+(diverso da `DROP`, che elimina l’intera tabella o una colonna).
+
+```sql
+DELETE FROM nome_tabella
+WHERE condizione;
+```
+### Attenzione!!
+Se non si specifica `WHERE`, vengono eliminati tutti i record:
+
+```sql
+DELETE FROM nome_tabella;
+```
+La struttura della tabella resta invariata.
+
+#### DELETE vs TRUNCATE
+Entrambi rimuovono i dati, ma:
+
+#### DELETE
+- può avere WHERE
+
+- attiva trigger
+
+- può essere rollbackato
+
+- più lento
+
+#### TRUNCATE
+```sql
+TRUNCATE TABLE nome_tabella;
+```
+- non ha WHERE
+
+- non attiva trigger
+
+- resetta contatori SERIAL
+
+- molto veloce
+
+- operazione DDL, non DML
+
+---
+
+# JOIN 
+
+Una JOIN serve a combinare righe di due (o più) tabelle usando una colonna in comune (tipicamente una chiave primaria in una tabella e una chiave esterna nell’altra).
+
+Esistono diversi tipi di Join:
+
+## CROSS JOIN
+
+Fa il prodotto cartesiano delle righe delle due tabelle 
+
+```sql
+SELECT
+    c.nome AS colore,
+    t.nome AS taglia
+FROM colori AS c
+CROSS JOIN taglie AS t;
+```
+
+il risultato è una tabella che ha come righe tutte le combinazioni possibili tra colori e taglie
+
+La cross join è utile per generare dati ma può esplodere 
+
+## INNER JOIN
+
+Restituisce solo le righe che hanno corrispondenza in entrambe le tabelle.
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+INNER JOIN table_b b
+ON a.key = b.key
+```
+`nota`: `JOIN` e `INNER JOIN` si equivalgono in postgres
+`nota`: se la chiave di join ha lo stesso nome nelle tabelle si può usare questa forma
+
+```sql
+...
+ON key
+```
+
+## LEFT JOIN e RIGHT JOIN
+
+LEFT: Restituisce tutte le righe della tabella di sinistra e, se esiste, la corrispondenza della tabella di destra.
+Se non c’è corrispondenza, i campi della tabella destra sono NULL.
+
+RIGHT: Restituisce tutte le righe della tabella di destra e, se esiste, la corrispondenza della tabella di sinistra.
+Se non c’è corrispondenza, i campi della tabella sinistra sono NULL.
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+LEFT JOIN table_b b
+ON a.key = b.key
+```
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+RIGHT JOIN table_b b
+ON a.key = b.key
+```
+
+## LEFT ANTI JOIN e RIGHT ANTI JOIN
+
+LEFT: le righe della tabella di sinistra che NON hanno alcuna corrispondenza nella tabella di destra, i campi della tabella destra sono NULL.
+
+RIGHT: le righe della tabella di destra che NON hanno alcuna corrispondenza nella tabella di sinistra, i campi della tabella sinistra sono NULL.
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+LEFT JOIN table_b b
+ON a.key = b.key
+WHERE b.key IS NULL
+```
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+RIGHT JOIN table_b b
+ON a.key = b.key
+WHERE a.key IS NULL
+```
+
+## FULL JOIN e FULL ANTI JOIN
+
+FULL JOIN (FULL OUTER JOIN): Restituisce tutte le righe di entrambe le tabelle:
+
+- righe che combaciano → unite
+
+- righe senza match → con NULL dalla parte mancante
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+FULL OUTER JOIN table_b b
+ON a.key = b.key
+```
+
+FULL ANTI JOIN: tutte le righe che non hanno corrispondenza tra le due tabelle, da entrambe le parti. In pratica l'opposto dell'inner join
+
+```sql
+SELECT lista_delle_colonne
+FROM table_a a
+FULL OUTER JOIN table_b b
+ON a.key = b.key
+WHERE a.key IS NULL OR b.key IS NULL
+```
