@@ -703,3 +703,5 @@ WHERE a.key IS NULL OR b.key IS NULL
 ```
 
 `nota`: si possono aggiungere condizioni dop la keyword ON, la condizione viene applicata PRIMA della join
+
+self join 

@@ -24,33 +24,33 @@ List<WebElement> elements = driver.findElements(By.<strategia>());
 
 ## Strategie di selezione degli elementi (By)
 
-### 2.1 ID
+### ID
 ```java
 driver.findElement(By.id("username"));
 ```
 
-### 2.2 Name
+### Name
 ```java
 driver.findElement(By.name("email"));
 ```
 
-### 2.3 Class Name
+### Class Name
 ```java
 driver.findElement(By.className("btn-primary"));
 ```
 
-### 2.4 Tag Name
+### Tag Name
 ```java
 driver.findElement(By.tagName("h1"));
 ```
 
-### 2.5 Link Text / Partial Link Text
+### Link Text / Partial Link Text
 ```java
 driver.findElement(By.linkText("Accedi"));
 driver.findElement(By.partialLinkText("Acc"));
 ```
 
-### 2.6 CSS Selector (molto versatile)
+### CSS Selector (molto versatile)
 
 #### Selezione per attributo
 ```css
@@ -69,7 +69,7 @@ driver.findElement(By.cssSelector("button[data-test='submit']"));
 div.card > h2.title
 ```
 
-### 2.7 XPath
+### XPath
 ```java
 driver.findElement(By.xpath("//*[@name='prova']"));
 driver.findElement(By.xpath("//button[text()='Invia']"));
@@ -172,7 +172,7 @@ Il valore dell’attributo `value` è solitamente stabile e indipendente dalla l
 ## Implicit Wait
 
 L’implicit wait definisce quanto tempo il driver attende
-prima di sollevare un’eccezione se un elemento non è immediatamente disponibile.
+prima di sollevare un’eccezione se un elemento non è immediatamente disponibile. Valore consigliato 4/5 secondi.
 
 Serve per attendere il corretto caricamento della pagina.
 ```java
@@ -199,4 +199,114 @@ driver.switchTo().frame("frameId");
 Per tornare alla pagina principale:
 ```java
 driver.switchTo().defaultContent();
+```
+
+## Nota su .isDisplayed()
+
+Si tratta di un metodo che restituisce un booleano:
+- `true` se l'elemento è presente e visibile nella pagina in cui si trova il driver.
+- `false` se l'elemento è **presente** ma non è visibile.
+
+Il problema è che questo metodo ci dice solo che un elemento è visibile non se è presente.
+
+Noi usiamo spesso questo metodo se vogliamo controllare (con un assert) che un'azione del nostro test sia stata effettivamente compiuta. 
+
+Quindi cerchiamo un elemento tramite la `.findElement(...)` e poi guardiamo se è visibile nella pagina.
+
+Il problema è che se l'elemento non è presente il metodo non ritorna `false` ma fallisce lanciando un Exception (`NoSuchElementException`). 
+
+Come fare?
+
+Si utilizza un try-catch statement:
+
+```java
+try {
+   return driver.findElement(...).isDisplayed();
+} catch (NoSuchElementException e) {
+   return false;
+}
+```
+Questo check ritorna esattamente quello che volevamo controllare.
+
+---
+
+## Page Object Model
+
+Cos'è il POM?
+
+Si tratta di un pattern per aumentare la leggibilità, la riproducibilità e la pulizia del codice utilizzato per fare test su siti web.
+
+Bisogna creare una classe per ogni pagina che visiterò durante il test.
+
+Queste classi vanno inserite in un package generalmente chiamato `pages`.
+
+Spesso è utile creare una classe `BasePage.java`: questo oggetto rappresenta una pagina astratta (not in a java way) da cui le altre pagine ereditano metodi comuni (ad esempio un metodo per effettuare una ricerca con una barra di ricerca presente in tutte le pagine del sito). 
+
+creo un pacchetto chiamato pages 
+
+creo un oggetto per ogni pagina e all'interno definisco
+un metodo per ogni azione che devo svolgere su quella pagina
+
+è importante passare il driver all'oggetto pagina
+
+nella classe in cui abbiamo facciamo i test e prepariamo l'ambiente
+dobbiamo instanziare le pagine che utilizzeremo
+
+questo pattern permette di avere dei test più leggibili e permette anche una migliore flessibilità nelle operzione che vogliamo fare in seguito 
+
+importante quando voglio vedere se un elemento è ancora presente nella pagine se utilizzo findElement e  l'elemento non c'è più (ad esempio il box dei coockies) fallisce lanciando un eccezione. 
+
+posso racchiuderlo all'interno di un try catch statement
+
+try {
+   driver.findElement(...)
+   return true;
+} catch (NoSuchElementExeption e) {
+   return false;
+}
+
+questo per verificare se l'elemento è presente 
+
+se voglio verificare la visibilità allora faccio questo 
+
+try {
+   return driver.findElement(...).isDisplayed();
+} catch (NoSuchElementExeption e) {
+   return false;
+}
+
+esiste anche un secondo modo
+
+sfrutto una feature del findElements
+cerca tutti gli elementi con un certo id (id o name o blblbl)
+in questo caso il metodo ritorna una lista vuota
+
+quindi se controllo con il metodo isEmpty ottengo true se non è presente in pagina e false se c'è a quel punto posso controllare se è displyato 
+
+i metodi si equivalgono a livello di tempo di esecuzione e a livello
+di complessità
+
+
+
+BasePage o TemplatePage 
+
+pagina senza corrispettivi nel sito da cui le altre pagine ereditno operzioni comuni 
+
+creo il driver come un attributo protetto (solo le classi che lo ereditano possono utilizzarlo)
+
+---
+
+page factory 
+
+utilizza delle annotazioni di selenium 
+
+bisogna dichiarare l'elemento con il nome che si vuole
+```java
+@FindBy(id = "iddell'elemento")
+private WebElement elementodelweb;
+
+public BasePage(WebDriver driver) {
+   this.driver = driver;
+   PageFactory.initElements(driver, this);
+}
 ```
